@@ -16,12 +16,24 @@ Including another URLconf
 """
 from django.http import JsonResponse
 from django.contrib import admin
-from django.urls import path
-
+from django.urls import path, re_path
+from django.views.generic import TemplateView
+from django.views.static import serve as static_serve
+from django.conf import settings
+from django.conf.urls.static import static
+import os
 
 def hello_view(request):
     return JsonResponse({'message': 'Hello from Django!'})
 
 urlpatterns = [
-    path('api/hello/', hello_view),
+    path('api/hello/', lambda request: JsonResponse({'message': 'Hello from Django!'})),
+
+    # Catch-all: serve React
+    re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")),
 ]
+
+
+# Serve React static files in production
+if settings.DEBUG is False:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,13 +1,17 @@
-# Dockerfile-backend
 FROM python:3.11-slim
 
+# Set envs
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+# Set working dir
 WORKDIR /app
 
+# Install deps
 COPY ./backend /app
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Copy React build into backend
+COPY ./frontend/build /app/frontend_build
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
