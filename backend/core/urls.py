@@ -1,39 +1,35 @@
-"""
-URL configuration for core project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.http import JsonResponse
 from django.contrib import admin
 from django.urls import path, re_path
 from django.views.generic import TemplateView
-from django.views.static import serve as static_serve
+from django.views.static import serve as django_static_serve
 from django.conf import settings
 from django.conf.urls.static import static
-import os
 
 def hello_view(request):
     return JsonResponse({'message': 'Hello from Django!'})
 
-urlpatterns = [
-    path('api/hello/', lambda request: JsonResponse({'message': 'Hello from Django!'})),
+def serve_static(request, path, document_root=None, show_indexes=False):
+    response = django_static_serve(request, path, document_root=document_root, show_indexes=show_indexes)
+    if path.endswith('.js'):
+        response['Content-Type'] = 'application/javascript'
+    elif path.endswith('.css'):
+        response['Content-Type'] = 'text/css'
+    return response
 
-    # Catch-all: serve React
-    re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")),
+
+urlpatterns = [
+    path("api/hello/", hello_view),
+    path("admin/", admin.site.urls),
 ]
 
+if not settings.DEBUG:
+    urlpatterns += [
+        re_path(r'^static/(?P<path>.*)$', serve_static, {'document_root': settings.STATIC_ROOT}),
+    ]
 
-# Serve React static files in production
-if settings.DEBUG is False:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# ✅ Catch-all React frontend (must be last)
+urlpatterns += [
+    re_path(r'^.*$', TemplateView.as_view(template_name="index.html")),
+]
