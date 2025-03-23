@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure--mpx+7(1uw(oy=6afvk^-7!9($%cb^7uu!9e3b2x)_zgh8=(pe
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False  # Important for serving static files in prod
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
 
 
 
